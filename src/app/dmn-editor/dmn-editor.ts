@@ -1,16 +1,19 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import DmnJS from 'dmn-js';
 
 @Component({
   selector: 'app-dmn-editor',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './dmn-editor.html',
   styleUrl: './dmn-editor.css'
 })
 export class DmnEditor implements AfterViewInit, OnDestroy {
   @ViewChild('dmnEditorContainer', { static: false }) dmnEditorContainer!: ElementRef;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   private dmnViewer: DmnJS | null = null;
+  isDragOver = false;
 
   constructor(private http: HttpClient) {}
 
@@ -32,9 +35,6 @@ export class DmnEditor implements AfterViewInit, OnDestroy {
       
       console.log('DMN Editor initialized successfully');
       
-      setTimeout(() => {
-        this.loadExampleDMN();
-      }, 500);
     } catch (error) {
       console.error('Error initializing DMN Editor:', error);
     }
@@ -140,5 +140,68 @@ export class DmnEditor implements AfterViewInit, OnDestroy {
     } else {
       throw new Error('DMN Editor not available');
     }
+  }
+
+  openFileDialog() {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.loadDmnFile(file);
+    }
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onFileDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      this.loadDmnFile(file);
+    }
+  }
+
+  private loadDmnFile(file: File) {
+    if (!file.name.toLowerCase().endsWith('.dmn') && !file.name.toLowerCase().endsWith('.xml')) {
+      console.error('Invalid file type. Please select a DMN (.dmn) or XML (.xml) file.');
+      alert('Invalid file type. Please select a DMN (.dmn) or XML (.xml) file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dmnXml = e.target?.result as string;
+      if (this.dmnViewer && dmnXml) {
+        this.dmnViewer.importXML(dmnXml)
+          .then(() => {
+            console.log(`DMN file "${file.name}" loaded successfully`);
+          })
+          .catch((err) => {
+            console.error('Error loading DMN file:', err);
+            alert('Error loading DMN file. Please check if the file is a valid DMN document.');
+          });
+      }
+    };
+    reader.onerror = () => {
+      console.error('Error reading file');
+      alert('Error reading file. Please try again.');
+    };
+    reader.readAsText(file);
   }
 }

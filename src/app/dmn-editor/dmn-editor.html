@@ -1,9 +1,21 @@
 <div class="dmn-editor-container">
   <div class="button-bar">
-    <button (click)="loadExampleDMN()" class="btn btn-primary">Load Example DMN</button>
+    <button (click)="openFileDialog()" class="btn btn-primary">Load DMN File</button>
+    <button (click)="loadExampleDMN()" class="btn btn-outline-primary">Load Example DMN</button>
     <button (click)="exportDMN()" class="btn btn-secondary">Export DMN</button>
+    <input #fileInput type="file" accept=".dmn,.xml" (change)="onFileSelected($event)" style="display: none;">
   </div>
-  <div class="editor-wrapper">
+  <div class="editor-wrapper" 
+       (dragover)="onDragOver($event)" 
+       (dragleave)="onDragLeave($event)"
+       (drop)="onFileDrop($event)"
+       [class.drag-over]="isDragOver">
     <div #dmnEditorContainer class="dmn-editor"></div>
+    <div class="drop-overlay" *ngIf="isDragOver">
+      <div class="drop-message">
+        <i class="drop-icon">📁</i>
+        <p>Drop DMN file here to load</p>
+      </div>
+    </div>
   </div>
 </div>

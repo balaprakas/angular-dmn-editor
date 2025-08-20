@@ -47,10 +47,28 @@
   background-color: #545b62;
 }
 
+.btn-outline-primary {
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+}
+
+.btn-outline-primary:hover {
+  background-color: #007bff;
+  color: white;
+}
+
 .editor-wrapper {
   flex: 1;
   display: flex;
   overflow: hidden;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.editor-wrapper.drag-over {
+  background-color: #e3f2fd;
+  border: 2px dashed #2196f3;
 }
 
 .dmn-editor {
@@ -58,4 +76,31 @@
   height: 100%;
   border: none;
   outline: none;
+}
+
+.drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(33, 150, 243, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.drop-message {
+  text-align: center;
+  color: #1976d2;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.drop-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 10px;
 }
