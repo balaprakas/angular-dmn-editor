@@ -1,1 +1,21 @@
-<app-dmn-editor></app-dmn-editor>
+<div class="app-container">
+  <div class="tab-navigation">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab() === 'dmn'"
+      (click)="setActiveTab('dmn')">
+      DMN Editor
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab() === 'drl'"
+      (click)="setActiveTab('drl')">
+      DRL Editor
+    </button>
+  </div>
+  
+  <div class="tab-content">
+    <app-dmn-editor *ngIf="activeTab() === 'dmn'"></app-dmn-editor>
+    <app-drl-editor *ngIf="activeTab() === 'drl'"></app-drl-editor>
+  </div>
+</div>

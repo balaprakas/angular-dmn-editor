@@ -1,0 +1,21 @@
+<div class="drl-editor-container">
+  <div class="button-bar">
+    <button (click)="openFileDialog()" class="btn btn-primary">Load DRL File</button>
+    <button (click)="downloadDrlFile()" class="btn btn-secondary">Download DRL</button>
+    <input #fileInput type="file" accept=".drl" (change)="onFileSelected($event)" style="display: none;">
+    <span class="file-name" *ngIf="currentFileName">{{ currentFileName }}</span>
+  </div>
+  <div class="editor-wrapper" 
+       (dragover)="onDragOver($event)" 
+       (dragleave)="onDragLeave($event)"
+       (drop)="onFileDrop($event)"
+       [class.drag-over]="isDragOver">
+    <div #drlEditorContainer class="monaco-editor"></div>
+    <div class="drop-overlay" *ngIf="isDragOver">
+      <div class="drop-message">
+        <i class="drop-icon">📁</i>
+        <p>Drop DRL file here to load</p>
+      </div>
+    </div>
+  </div>
+</div>
