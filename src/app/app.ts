@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { DmnEditor } from './dmn-editor/dmn-editor';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [DmnEditor],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

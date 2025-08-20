@@ -25,8 +25,16 @@
               }
             ],
             "styles": [
-              "src/styles.css"
-            ]
+              "src/styles.css",
+              "node_modules/dmn-js/dist/assets/diagram-js.css",
+              "node_modules/dmn-js/dist/assets/dmn-js-shared.css",
+              "node_modules/dmn-js/dist/assets/dmn-js-drd.css",
+              "node_modules/dmn-js/dist/assets/dmn-js-decision-table.css",
+              "node_modules/dmn-js/dist/assets/dmn-js-literal-expression.css",
+              "node_modules/dmn-js/dist/assets/dmn-js-boxed-expression.css",
+              "node_modules/dmn-js/dist/assets/dmn-font/css/dmn.css"
+            ],
+            "scripts": []
           },
           "configurations": {
             "production": {
