@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import DmnJS from 'dmn-js';
+import Modeler from 'dmn-js/lib/Modeler';
 
 @Component({
   selector: 'app-dmn-editor',
@@ -12,7 +12,7 @@ import DmnJS from 'dmn-js';
 export class DmnEditor implements AfterViewInit, OnDestroy {
   @ViewChild('dmnEditorContainer', { static: false }) dmnEditorContainer!: ElementRef;
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
-  private dmnViewer: DmnJS | null = null;
+  private dmnModeler: Modeler | null = null;
   isDragOver = false;
 
   constructor(private http: HttpClient) {}
@@ -22,21 +22,21 @@ export class DmnEditor implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.dmnViewer) {
-      this.dmnViewer.destroy();
+    if (this.dmnModeler) {
+      this.dmnModeler.destroy();
     }
   }
 
   private initializeDmnEditor() {
     try {
-      this.dmnViewer = new DmnJS({
+      this.dmnModeler = new Modeler({
         container: this.dmnEditorContainer.nativeElement
       });
       
-      console.log('DMN Editor initialized successfully');
+      console.log('DMN Modeler initialized successfully');
       
     } catch (error) {
-      console.error('Error initializing DMN Editor:', error);
+      console.error('Error initializing DMN Modeler:', error);
     }
   }
 
@@ -93,34 +93,34 @@ export class DmnEditor implements AfterViewInit, OnDestroy {
   </decision>
 </definitions>`;
 
-    if (this.dmnViewer) {
-      this.dmnViewer.importXML(sampleDmnXml)
+    if (this.dmnModeler) {
+      this.dmnModeler.importXML(sampleDmnXml)
         .then(() => {
           console.log('Sample DMN loaded successfully');
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.error('Error loading sample DMN:', err);
         });
     }
   }
 
   async exportDMN() {
-    if (this.dmnViewer) {
+    if (this.dmnModeler) {
       try {
-        const result = await this.dmnViewer.saveXML({ format: true });
+        const result = await this.dmnModeler.saveXML({ format: true });
         console.log('Current DMN XML:', result.xml);
       } catch (err) {
         console.error('Error exporting DMN:', err);
       }
     } else {
-      console.error('DMN Editor not available');
+      console.error('DMN Modeler not available');
     }
   }
 
   async getContent(): Promise<string> {
-    if (this.dmnViewer) {
+    if (this.dmnModeler) {
       try {
-        const result = await this.dmnViewer.saveXML({ format: true });
+        const result = await this.dmnModeler.saveXML({ format: true });
         return result.xml || '';
       } catch (err) {
         throw err;
@@ -131,14 +131,14 @@ export class DmnEditor implements AfterViewInit, OnDestroy {
   }
 
   async setContent(dmnXml: string): Promise<void> {
-    if (this.dmnViewer) {
+    if (this.dmnModeler) {
       try {
-        await this.dmnViewer.importXML(dmnXml);
+        await this.dmnModeler.importXML(dmnXml);
       } catch (err) {
         throw err;
       }
     } else {
-      throw new Error('DMN Editor not available');
+      throw new Error('DMN Modeler not available');
     }
   }
 
@@ -187,12 +187,12 @@ export class DmnEditor implements AfterViewInit, OnDestroy {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dmnXml = e.target?.result as string;
-      if (this.dmnViewer && dmnXml) {
-        this.dmnViewer.importXML(dmnXml)
+      if (this.dmnModeler && dmnXml) {
+        this.dmnModeler.importXML(dmnXml)
           .then(() => {
             console.log(`DMN file "${file.name}" loaded successfully`);
           })
-          .catch((err) => {
+          .catch((err: any) => {
             console.error('Error loading DMN file:', err);
             alert('Error loading DMN file. Please check if the file is a valid DMN document.');
           });
