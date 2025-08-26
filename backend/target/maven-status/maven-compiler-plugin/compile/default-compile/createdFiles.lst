@@ -1,0 +1,11 @@
+com/businesscentral/model/ExecutionResult.class
+com/businesscentral/service/ValidationService$ValidationResult.class
+com/businesscentral/service/ValidationService.class
+com/businesscentral/service/ExecutionService.class
+com/businesscentral/controller/ExecutionController.class
+com/businesscentral/model/ModelAsset.class
+com/businesscentral/BusinessCentralApplication.class
+com/businesscentral/service/ModelAssetService.class
+com/businesscentral/config/CorsConfig.class
+com/businesscentral/model/ExecutionRequest.class
+com/businesscentral/controller/ModelAssetController.class

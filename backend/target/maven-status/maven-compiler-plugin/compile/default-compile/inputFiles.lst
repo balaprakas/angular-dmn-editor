@@ -1,0 +1,10 @@
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/config/CorsConfig.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/model/ModelAsset.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/service/ModelAssetService.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/service/ValidationService.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/service/ExecutionService.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/controller/ExecutionController.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/controller/ModelAssetController.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/BusinessCentralApplication.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/model/ExecutionRequest.java
+/home/ubuntu/business-central-alternative/backend/src/main/java/com/businesscentral/model/ExecutionResult.java
