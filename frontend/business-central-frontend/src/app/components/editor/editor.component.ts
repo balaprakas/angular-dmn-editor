@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,11 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../services/api.service';
 import { ModelAsset } from '../../models/model-asset';
+
+import BpmnModeler from 'bpmn-js/lib/Modeler';
+// @ts-ignore
+import DmnModeler from 'dmn-js/lib/Modeler';
+import * as monaco from 'monaco-editor';
 
 @Component({
   selector: 'app-editor',
@@ -71,13 +76,13 @@ import { ModelAsset } from '../../models/model-asset';
             <mat-tab label="Visual Editor">
               <div class="visual-editor" #visualEditor>
                 <div *ngIf="assetType === 'bpmn'" class="bpmn-editor">
-                  <div id="bpmn-canvas" class="editor-canvas"></div>
+                  <div #bpmnCanvas class="editor-canvas"></div>
                 </div>
                 <div *ngIf="assetType === 'dmn'" class="dmn-editor">
-                  <div id="dmn-canvas" class="editor-canvas"></div>
+                  <div #dmnCanvas class="editor-canvas"></div>
                 </div>
                 <div *ngIf="assetType === 'drl'" class="drl-editor">
-                  <div id="monaco-editor" class="editor-canvas"></div>
+                  <div #monacoEditor class="editor-canvas"></div>
                 </div>
               </div>
             </mat-tab>
@@ -142,10 +147,18 @@ import { ModelAsset } from '../../models/model-asset';
     }
   `]
 })
-export class EditorComponent implements OnInit {
+export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('bpmnCanvas', { static: false }) bpmnCanvas!: ElementRef;
+  @ViewChild('dmnCanvas', { static: false }) dmnCanvas!: ElementRef;
+  @ViewChild('monacoEditor', { static: false }) monacoEditorRef!: ElementRef;
+
   assetType: string = '';
   assetId: string | null = null;
   isEditMode: boolean = false;
+  
+  private bpmnModeler: BpmnModeler | null = null;
+  private dmnModeler: DmnModeler | null = null;
+  private monacoEditor: monaco.editor.IStandaloneCodeEditor | null = null;
   asset: ModelAsset = {
     name: '',
     type: 'BPMN',
@@ -173,6 +186,24 @@ export class EditorComponent implements OnInit {
         this.initializeNewAsset();
       }
     });
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.initializeEditors();
+    }, 100);
+  }
+
+  ngOnDestroy() {
+    if (this.bpmnModeler) {
+      this.bpmnModeler.destroy();
+    }
+    if (this.dmnModeler) {
+      this.dmnModeler.destroy();
+    }
+    if (this.monacoEditor) {
+      this.monacoEditor.dispose();
+    }
   }
 
   loadAsset() {
@@ -258,11 +289,13 @@ end`;
     }
   }
 
-  save() {
+  async save() {
     if (!this.asset.name) {
       this.snackBar.open('Please enter a name for the asset', 'Close', { duration: 3000 });
       return;
     }
+
+    await this.syncVisualEditorContent();
 
     const saveOperation = this.isEditMode && this.assetId
       ? this.apiService.updateAsset(this.assetId, this.asset)
@@ -305,5 +338,121 @@ end`;
 
   goBack() {
     this.router.navigate(['/dashboard']);
+  }
+
+  private initializeEditors() {
+    switch (this.assetType) {
+      case 'bpmn':
+        this.initializeBpmnEditor();
+        break;
+      case 'dmn':
+        this.initializeDmnEditor();
+        break;
+      case 'drl':
+        this.initializeMonacoEditor();
+        break;
+    }
+  }
+
+  private initializeBpmnEditor() {
+    if (this.bpmnCanvas && this.bpmnCanvas.nativeElement) {
+      this.bpmnModeler = new BpmnModeler({
+        container: this.bpmnCanvas.nativeElement
+      });
+
+      this.loadBpmnDiagram();
+
+      this.bpmnModeler.on('commandStack.changed', () => {
+        this.syncBpmnToSource();
+      });
+    }
+  }
+
+  private async loadBpmnDiagram() {
+    if (!this.bpmnModeler) return;
+
+    try {
+      const xml = this.asset.content || this.getDefaultContent();
+      await this.bpmnModeler.importXML(xml);
+    } catch (err) {
+      console.error('Error loading BPMN diagram:', err);
+      this.snackBar.open('Failed to load BPMN diagram', 'Close', { duration: 3000 });
+    }
+  }
+
+  private async syncBpmnToSource() {
+    if (!this.bpmnModeler) return;
+
+    try {
+      const { xml } = await this.bpmnModeler.saveXML({ format: true });
+      this.asset.content = xml || '';
+    } catch (err) {
+      console.error('Error syncing BPMN to source:', err);
+    }
+  }
+
+  private initializeDmnEditor() {
+    if (this.dmnCanvas && this.dmnCanvas.nativeElement) {
+      this.dmnModeler = new DmnModeler({
+        container: this.dmnCanvas.nativeElement
+      });
+
+      this.loadDmnDiagram();
+
+      this.dmnModeler.on('commandStack.changed', () => {
+        this.syncDmnToSource();
+      });
+    }
+  }
+
+  private async loadDmnDiagram() {
+    if (!this.dmnModeler) return;
+
+    try {
+      const xml = this.asset.content || this.getDefaultContent();
+      await this.dmnModeler.importXML(xml);
+    } catch (err) {
+      console.error('Error loading DMN diagram:', err);
+      this.snackBar.open('Failed to load DMN diagram', 'Close', { duration: 3000 });
+    }
+  }
+
+  private async syncDmnToSource() {
+    if (!this.dmnModeler) return;
+
+    try {
+      const { xml } = await this.dmnModeler.saveXML({ format: true });
+      this.asset.content = xml || '';
+    } catch (err) {
+      console.error('Error syncing DMN to source:', err);
+    }
+  }
+
+  private initializeMonacoEditor() {
+    if (this.monacoEditorRef && this.monacoEditorRef.nativeElement) {
+      this.monacoEditor = monaco.editor.create(this.monacoEditorRef.nativeElement, {
+        value: this.asset.content || this.getDefaultContent(),
+        language: 'java',
+        theme: 'vs-dark',
+        automaticLayout: true
+      });
+
+      this.monacoEditor.onDidChangeModelContent(() => {
+        this.asset.content = this.monacoEditor?.getValue() || '';
+      });
+    }
+  }
+
+  private async syncVisualEditorContent() {
+    switch (this.assetType) {
+      case 'bpmn':
+        await this.syncBpmnToSource();
+        break;
+      case 'dmn':
+        await this.syncDmnToSource();
+        break;
+      case 'drl':
+        break;
+    }
   }
 }
