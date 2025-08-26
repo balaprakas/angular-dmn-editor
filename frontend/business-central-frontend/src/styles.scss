@@ -3,7 +3,27 @@
 @import 'bpmn-js/dist/assets/bpmn-js.css';
 @import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 
+/* Import properties panel styles */
+@import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
+
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* BPMN Editor Layout */
+.bpmn-container {
+  display: flex;
+  height: 100%;
+}
+
+.editor-canvas {
+  flex: 1;
+  height: 100%;
+}
+
+.properties-panel {
+  width: 300px;
+  border-left: 1px solid #ccc;
+  background: white;
+}

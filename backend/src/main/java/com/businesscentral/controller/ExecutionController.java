@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -78,5 +80,31 @@ public class ExecutionController {
 
         ExecutionResult result = executionService.executeDrl(asset.get(), request.getInputData());
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/execute-bpmn")
+    public ResponseEntity<ExecutionResult> executeBpmnXml(@RequestBody Map<String, Object> request) {
+        try {
+            String bpmnXml = (String) request.get("bpmnXml");
+            Map<String, Object> variables = (Map<String, Object>) request.getOrDefault("variables", new HashMap<>());
+            
+            if (bpmnXml == null || bpmnXml.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            ModelAsset tempAsset = new ModelAsset();
+            tempAsset.setId("temp-" + System.currentTimeMillis());
+            tempAsset.setContent(bpmnXml);
+            tempAsset.setType("BPMN");
+            
+            ExecutionResult result = executionService.executeBpmn(tempAsset, variables);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            ExecutionResult errorResult = new ExecutionResult(
+                null, "BPMN", null, null, false, 
+                "Execution failed: " + e.getMessage()
+            );
+            return ResponseEntity.status(500).body(errorResult);
+        }
     }
 }

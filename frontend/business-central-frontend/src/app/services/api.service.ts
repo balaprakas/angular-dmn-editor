@@ -7,7 +7,7 @@ import { ModelAsset, ExecutionRequest, ExecutionResult, ValidationResult } from 
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/business-central/api';
+  private baseUrl = 'http://localhost:8081/business-central/api';
 
   constructor(private http: HttpClient) {}
 
@@ -53,5 +53,9 @@ export class ApiService {
 
   executeDrl(id: string, inputData: any): Observable<ExecutionResult> {
     return this.http.post<ExecutionResult>(`${this.baseUrl}/execution/drl/${id}`, { inputData });
+  }
+
+  executeBpmnXml(bpmnXml: string, variables: any = {}): Observable<ExecutionResult> {
+    return this.http.post<ExecutionResult>(`${this.baseUrl}/execution/execute-bpmn`, { bpmnXml, variables });
   }
 }

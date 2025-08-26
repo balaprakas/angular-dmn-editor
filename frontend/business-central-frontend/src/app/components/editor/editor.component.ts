@@ -14,6 +14,8 @@ import { ModelAsset } from '../../models/model-asset';
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 // @ts-ignore
+import apiCallExtension, { apiCallDescriptor } from '../../bpmn-extensions/index.js';
+// @ts-ignore
 import DmnModeler from 'dmn-js/lib/Modeler';
 import * as monaco from 'monaco-editor';
 
@@ -76,7 +78,10 @@ import * as monaco from 'monaco-editor';
             <mat-tab label="Visual Editor">
               <div class="visual-editor" #visualEditor>
                 <div *ngIf="assetType === 'bpmn'" class="bpmn-editor">
-                  <div #bpmnCanvas class="editor-canvas"></div>
+                  <div class="bpmn-container">
+                    <div #bpmnCanvas class="editor-canvas"></div>
+                    <div id="properties-panel" class="properties-panel"></div>
+                  </div>
                 </div>
                 <div *ngIf="assetType === 'dmn'" class="dmn-editor">
                   <div #dmnCanvas class="editor-canvas"></div>
@@ -239,13 +244,38 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
                   id="Definitions_1" 
                   targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:process id="Process_1" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1"/>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ApiCallTask_1" name="Test API Call" apiUrl="https://jsonplaceholder.typicode.com/users/1" httpMethod="GET" requestBody="">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="ApiCallTask_1"/>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="ApiCallTask_1" targetRef="EndEvent_1"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="179" y="99" width="36" height="36"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_ServiceTask_1" bpmnElement="ApiCallTask_1">
+        <dc:Bounds x="270" y="77" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_EndEvent_1" bpmnElement="EndEvent_1">
+        <dc:Bounds x="420" y="99" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="_BPMNEdge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="215" y="117"/>
+        <di:waypoint x="270" y="117"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_BPMNEdge_Flow_2" bpmnElement="Flow_2">
+        <di:waypoint x="370" y="117"/>
+        <di:waypoint x="420" y="117"/>
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>`;
@@ -357,7 +387,13 @@ end`;
   private initializeBpmnEditor() {
     if (this.bpmnCanvas && this.bpmnCanvas.nativeElement) {
       this.bpmnModeler = new BpmnModeler({
-        container: this.bpmnCanvas.nativeElement
+        container: this.bpmnCanvas.nativeElement,
+        additionalModules: [
+          apiCallExtension
+        ],
+        moddleExtensions: {
+          apiCall: apiCallDescriptor
+        },
       });
 
       this.loadBpmnDiagram();

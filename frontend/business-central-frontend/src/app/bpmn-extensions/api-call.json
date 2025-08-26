@@ -1,0 +1,28 @@
+{
+  "name": "ApiCall",
+  "uri": "http://businesscentral/api-call",
+  "prefix": "apicall",
+  "types": [
+    {
+      "name": "ApiCallTask",
+      "extends": ["bpmn:ServiceTask"],
+      "properties": [
+        {
+          "name": "apiUrl",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "httpMethod",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "requestBody",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}
